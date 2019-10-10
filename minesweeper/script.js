@@ -6,7 +6,7 @@ const OFFSET_X = 500
 const OFFSET_Y = 50
 
 const NB_MINES = 12
-const SIZE = 16
+const SIZE = 16 // IE : grid will be SIZE*SIZE case
 
 const EPSILON = 0.1
 const LEARNING_RATE = 0.3
@@ -80,7 +80,7 @@ document.onclick = mouse => {
   minesweeper.clicked(indiceGridClicked, "left")
 }
 document.oncontextmenu = mouse => {
-    mouse.preventDefault();
+    mouse.preventDefault()
     let [x, y] = [mouse.clientX, mouse.clientY]
     let gridX = Math.floor((x-OFFSET_X) / SIZE_CASE)
     let gridY = Math.floor((y-OFFSET_Y) / SIZE_CASE)
@@ -108,7 +108,7 @@ class Minesweeper {
       if (this.grid[indiceGridClicked] === 0) {
         if (this.neighborsMinesGrid[indiceGridClicked] === 0) {
           this.seenGrid[indiceGridClicked] = -2
-          // Recursivite sur les mines autours..
+          // Recursivity on surrounding mines
           if (! (indiceGridClicked % SIZE === 0)) this.clicked(indiceGridClicked - 1, "left")
           if (! ((indiceGridClicked+1) % SIZE === 0)) this.clicked(indiceGridClicked + 1, "left")
           if (! (indiceGridClicked < SIZE)) this.clicked(indiceGridClicked - SIZE, "left")
