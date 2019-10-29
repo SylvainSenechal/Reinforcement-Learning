@@ -1,10 +1,3 @@
-// const square = a => a*a
-//
-// export default {square}
-//
-// import square from './test.js'
-// console.log(square.square(10))
-
 const SIZE = 16 // the size of the grid will be SIZE*SIZE
 
 const SIZE_CASE = 40 // number of pixels per case (1 case => 40x40 pixels)
@@ -19,7 +12,6 @@ export default class Snake {
     this.direction = 0 // 0=>right, 1=>top, 2=>left, 3=>bottom
     this.newDirection = 0 // 0=> no change in direction, 1=>turning left, 2=>turning right
     this.tick = 0
-    console.log(this)
   }
 
   createSnake = () => { // Snake created in the middle
@@ -29,7 +21,7 @@ export default class Snake {
     ]
   }
 
-  updateDirection = keyCode => {
+  updateDirectionKeyboard = keyCode => {
     // Directions : 0 => right, 1 => top, 2 => left, 3 => bottom
     if (keyCode === 38) return // 38 <=> keep going straight
     if (keyCode === 37) { // turning left from current direction
@@ -65,7 +57,45 @@ export default class Snake {
     }
   }
 
-  step = () => {
+  updateDirection = action => {
+    if (action === 0) return // keep going straight
+    if (action === 1) {
+      switch (this.direction) { // turning left from current direction
+        case 0:
+          this.direction = 1
+          break
+        case 1:
+          this.direction = 2
+          break
+        case 2:
+          this.direction = 3
+          break
+        case 3:
+          this.direction = 0
+          break
+      }
+    } else if (action === 2) { // turning right from current direction
+      switch (this.direction) {
+        case 0:
+          this.direction = 3
+          break
+        case 1:
+          this.direction = 0
+          break
+        case 2:
+          this.direction = 1
+          break
+        case 3:
+          this.direction = 2
+          break
+      }
+    }
+  }
+
+  step = action => {
+    console.log(action)
+    this.updateDirection(action)
+
     let lengthSnake = this.snake.length
     // Moving the head
     if (this.direction === 0) { // going right
@@ -83,6 +113,10 @@ export default class Snake {
     } else {
       this.snake.shift()
     }
+
+    // TODO: check failing move
+
+    
   }
 
   addFood = () => {
@@ -90,6 +124,7 @@ export default class Snake {
     let newFoodPositionX = 0
     let newFoodPositionY = 0
     do {
+      availablePlace = true
       newFoodPositionX = Math.floor(Math.random()*SIZE)
       newFoodPositionY = Math.floor(Math.random()*SIZE)
       for (let i = 0; i < this.snake.length; i++) {
@@ -100,6 +135,22 @@ export default class Snake {
     } while (availablePlace === false)
     this.foodX = newFoodPositionX
     this.foodY = newFoodPositionY
+  }
+
+  getStateAsTensor = () => {
+    // Creating a grid tensor of size [nbSamples=1, SIZE=width, SIZE=height, DEPTH=2]
+    // Depth is 2 : the first for body parts, the second for food position
+    let nbSamples = 0 // (ie : 1 example of id 0)
+    let buffer = tf.buffer([1, SIZE, SIZE, 2]) // TODO: remove 1 optional ?
+    this.snake.forEach((bodyPart, index) => {
+      console.log('oui')
+      // In the first depth : placing 2 if bodyPart is the head, 1 else,
+      buffer.set(index === 0 ? 2 : 1, nbSamples, bodyPart[0], bodyPart[1], 0)
+    })
+    // In the second depth : placing 1 at the food position
+    buffer.set(1, nbSamples, this.foodX, this.foodY, 1)
+
+    return buffer.toTensor()
   }
 
   drawEnvironnement = (ctx, canvas) => {

@@ -1,6 +1,6 @@
-'use strict';
-
-import environnement from './snakeGame.js'
+import snake from './snakeGame.js'
+import neuralNetwork from './neuralNetwork.js'
+import agent from './agent.js'
 
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
@@ -9,16 +9,19 @@ let height = window.innerHeight
 ctx.canvas.width = width
 ctx.canvas.height = height
 
-const snake = new environnement()
+const environnement = new snake()
+const brain = neuralNetwork()
+const agentSnake = new agent(snake, brain)
+
 console.log(snake)
 
-document.onkeydown = key => snake.updateDirection(key.keyCode)
+document.onkeydown = key => environnement.updateDirectionKeyboard(key.keyCode)
 
 const loop = () => {
-  snake.tick++
-  snake.drawEnvironnement(ctx, canvas) // Draw the game
-  if (snake.tick % 10 === 0) { // TODO: game loop in class
-    snake.step()
+  environnement.tick++
+  environnement.drawEnvironnement(ctx, canvas) // Draw the game
+  if (environnement.tick % 10 === 0) { // TODO: game loop in class
+    environnement.step()
   }
 
   requestAnimationFrame(loop) // Repeat..
