@@ -8,7 +8,7 @@ const neuralNetwork = (h = 16, w = 16) => {
     kernelSize: 3,
     strides: 1,
     activation: 'relu',
-    inputShape: [16, w, 2]
+    inputShape: [h, w, 2]
   }))
   model.add(tf.layers.batchNormalization());
   model.add(tf.layers.conv2d({

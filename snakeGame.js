@@ -4,14 +4,24 @@ const SIZE_CASE = 40 // number of pixels per case (1 case => 40x40 pixels)
 const OFFSET_X = 500 // pixels offset for drawing the whole scene in the middle of the page
 const OFFSET_Y = 50
 
+const REWARD_FOOD = 10 // eating something
+const REWARD_LOST = -10 // losing the game
+const REWARD_NOTHING = -0.2 // moving without eating or losing
+
 export default class Snake {
   constructor() {
     this.createSnake()
     this.addFood()
-    this.gameOver = false // Game over, or on
+    // this.gameOver = false // Game over, or on
     this.direction = 0 // 0=>right, 1=>top, 2=>left, 3=>bottom
-    this.newDirection = 0 // 0=> no change in direction, 1=>turning left, 2=>turning right
+    // this.newDirection = 0 // 0=> no change in direction, 1=>turning left, 2=>turning right
     this.tick = 0
+  }
+
+  reset = () => {
+    this.createSnake()
+    this.addFood()
+    console.log('reset')
   }
 
   createSnake = () => { // Snake created in the middle
@@ -19,6 +29,24 @@ export default class Snake {
       [Math.floor(SIZE/2), Math.floor(SIZE/2)],
       [Math.floor(SIZE/2), Math.floor(SIZE/2) + 1]
     ]
+  }
+
+  addFood = () => {
+    let availablePlace = true
+    let newFoodPositionX = 0
+    let newFoodPositionY = 0
+    do {
+      availablePlace = true
+      newFoodPositionX = Math.floor(Math.random()*SIZE)
+      newFoodPositionY = Math.floor(Math.random()*SIZE)
+      for (let i = 0; i < this.snake.length; i++) {
+        if (newFoodPositionX === this.snake[i][1] && newFoodPositionY === this.snake[i][0]) {
+          availablePlace = false // TODO: add break statement ?
+        }
+      }
+    } while (availablePlace === false)
+    this.foodX = newFoodPositionX
+    this.foodY = newFoodPositionY
   }
 
   updateDirectionKeyboard = keyCode => {
@@ -93,7 +121,7 @@ export default class Snake {
   }
 
   step = action => {
-    console.log(action)
+    // console.log(action)
     this.updateDirection(action)
 
     let lengthSnake = this.snake.length
@@ -107,48 +135,77 @@ export default class Snake {
     } else { // going down
       this.snake.push([this.snake[lengthSnake-1][0] + 1, this.snake[lengthSnake-1][1]])
     }
+
+    //////////////////////////////
+    // Checking if game is lost //
+    //////////////////////////////
+    let gameOver = false
+    // if the head of the snake is outside the grid, game over
+    if (this.snake[lengthSnake][0] >= SIZE || this.snake[lengthSnake][0] < 0 || this.snake[lengthSnake][1] >= SIZE || this.snake[lengthSnake][1] < 0) {
+      gameOver = true
+    }
+    for (let i = 0; i < this.snake.length-1; i++) { // we are checking if the head is touching the body, -1 beacause last element is the head
+      if (this.snake[lengthSnake][0] === this.snake[i][0] && this.snake[lengthSnake][1] === this.snake[i][1]) {
+        gameOver = true
+      }
+    }
+
+    if (gameOver) {
+      return {reward: REWARD_LOST, gameOver}
+    }
+
+
     // Check if we are eating the fruit
-    if (this.snake[lengthSnake-1][1] === this.foodX && this.snake[lengthSnake-1][0] === this.foodY) {
+    let reward = REWARD_NOTHING
+    if (this.snake[lengthSnake][1] === this.foodX && this.snake[lengthSnake][0] === this.foodY) {
       this.addFood()
+      reward = REWARD_FOOD
     } else {
       this.snake.shift()
     }
 
-    // TODO: check failing move
-
-    
+    let nextState = this.getState()
+    return {nextState, reward, gameOver}
   }
 
-  addFood = () => {
-    let availablePlace = true
-    let newFoodPositionX = 0
-    let newFoodPositionY = 0
-    do {
-      availablePlace = true
-      newFoodPositionX = Math.floor(Math.random()*SIZE)
-      newFoodPositionY = Math.floor(Math.random()*SIZE)
-      for (let i = 0; i < this.snake.length; i++) {
-        if (newFoodPositionX === this.snake[i][1] && newFoodPositionY === this.snake[i][0]) {
-          availablePlace = false // TODO: add break statement ?
-        }
-      }
-    } while (availablePlace === false)
-    this.foodX = newFoodPositionX
-    this.foodY = newFoodPositionY
+  getState = () => {
+    // return {
+    //   "bodySnake": [...this.snake], // TODO: check slice
+    //   "foodPos": [this.foodX, this.foodY]
+    // }
+    return {
+      "bodySnake": this.snake.slice(), // TODO: check slice
+      "foodPos": [this.foodX, this.foodY]
+    }
   }
 
-  getStateAsTensor = () => {
-    // Creating a grid tensor of size [nbSamples=1, SIZE=width, SIZE=height, DEPTH=2]
+  getStateAsTensor = state => {
+    // Creating a grid tensor of size [nbSamples, SIZE=width, SIZE=height, DEPTH=2]
     // Depth is 2 : the first for body parts, the second for food position
-    let nbSamples = 0 // (ie : 1 example of id 0)
-    let buffer = tf.buffer([1, SIZE, SIZE, 2]) // TODO: remove 1 optional ?
-    this.snake.forEach((bodyPart, index) => {
-      console.log('oui')
-      // In the first depth : placing 2 if bodyPart is the head, 1 else,
-      buffer.set(index === 0 ? 2 : 1, nbSamples, bodyPart[0], bodyPart[1], 0)
-    })
-    // In the second depth : placing 1 at the food position
-    buffer.set(1, nbSamples, this.foodX, this.foodY, 1)
+    if (!Array.isArray(state)) { // Dealing with the single state case
+      state = [state]
+    }
+    let nbSamples = state.length // (ie : 1 example of id 0)
+    let buffer = tf.buffer([nbSamples, SIZE, SIZE, 2]) // TODO: remove 1 optional ?
+
+    for (let i = 0; i < nbSamples; i++) {
+      if (state[i] == null) { // TODO: gerer state[n] == null ? voir pourquoi
+        continue
+      }
+      state[i].bodySnake.forEach((bodyPart, index) => {
+        buffer.set(index === 0 ? 2 : 1, i, bodyPart[0], bodyPart[1], 0)
+      })
+      state[i].foodPos.forEach((food, index) => {
+        buffer.set(1, i, food[0], food[1], 1)
+      })
+    }
+
+    // this.snake.forEach((bodyPart, index) => {
+    //   // In the first depth : placing 2 if bodyPart is the head, 1 else,
+    //   buffer.set(index === 0 ? 2 : 1, nbSamples, bodyPart[0], bodyPart[1], 0)
+    // })
+    // // In the second depth : placing 1 at the food position
+    // buffer.set(1, nbSamples, this.foodX, this.foodY, 1)
 
     return buffer.toTensor()
   }

@@ -11,17 +11,27 @@ ctx.canvas.height = height
 
 const environnement = new snake()
 const brain = neuralNetwork()
-const agentSnake = new agent(snake, brain)
+const agentSnake = new agent(environnement, brain)
 
-console.log(snake)
+console.log(environnement)
+console.log(brain)
+console.log(agentSnake)
+
+for (let i = 0; i < 3; i++) {
+  console.log('epochA : ', i)
+  agentSnake.trainMyBrain()
+}
+console.log('FIN')
 
 document.onkeydown = key => environnement.updateDirectionKeyboard(key.keyCode)
 
 const loop = () => {
-  environnement.tick++
-  environnement.drawEnvironnement(ctx, canvas) // Draw the game
-  if (environnement.tick % 10 === 0) { // TODO: game loop in class
-    environnement.step()
+  agentSnake.environnement.tick++
+  agentSnake.environnement.drawEnvironnement(ctx, canvas) // Draw the game
+  if (agentSnake.environnement.tick % 10 === 0) { // TODO: game loop in class
+    agentSnake.playOneStep()
+    // console.log(agentSnake.replayMemory.length)
+    // console.log(agentSnake.replayMemory)
   }
 
   requestAnimationFrame(loop) // Repeat..
