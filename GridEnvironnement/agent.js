@@ -59,7 +59,11 @@ export default class Agent {
       iteration++
       let currentCasePath = path[path.length - 1]
       let currentState = currentCasePath[0] + currentCasePath[1] * SIZE_GRID
+      if (currentState <= 0 || currentState >= SIZE_GRID * SIZE_GRID) {
+        continue
+      }
       let bestAction = ALL_ACTIONS[this.argMax(this.QTable[currentState])]
+
       if (bestAction === 0) {
         path.push([currentCasePath[0] + 1, currentCasePath[1]])
       } else if (bestAction === 1) {
@@ -70,7 +74,7 @@ export default class Agent {
         path.push([currentCasePath[0], currentCasePath[1] + 1])
       }
 
-      if (currentCasePath[0] === SIZE_GRID - 1 && currentCasePath[1] === 0) {
+      if (path[path.length - 1][0] === SIZE_GRID - 1 && path[path.length - 1][1] === 0) {
         targetReached = true
       }
     }
@@ -83,6 +87,7 @@ export default class Agent {
     // Best Path drawing //
     ///////////////////////
     let bestPath = this.reconstructBestPath()
+    console.log(bestPath)
     ctx.strokeStyle = "#ff00ff"
     ctx.beginPath()
     ctx.moveTo(
