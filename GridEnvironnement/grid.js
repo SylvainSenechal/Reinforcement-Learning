@@ -11,7 +11,7 @@ const REWARD_WALL = - 1
 
 const DRAWING_OFFSET_X = 500 // pixels offset for drawing the whole scene in the middle of the page
 const DRAWING_OFFSET_Y = 50
-const DRAWING_SIZE_CASE = 40 // number of pixels per case (1 case => 40x40 pixels)
+const DRAWING_SIZE_CASE = 80 // number of pixels per case (1 case => 40x40 pixels)
 
 export class Grid {
   constructor() {
@@ -26,8 +26,8 @@ export class Grid {
   }
 
   reset = () => {
-    this.agentX = 1
-    this.agentY = 1
+    this.agentX = 0
+    this.agentY = 2
   }
 
   getState = () => this.agentX + this.agentY * SIZE_GRID
@@ -36,7 +36,6 @@ export class Grid {
     // 0 => right, 1 => top, 2 => left, 3 bottom
     let reward = 0
     let nextState
-    let gameOver = false
 
     if (action === ACTION_RIGHT) {
       this.agentX = this.agentX === SIZE_GRID - 1 ? SIZE_GRID - 1 : this.agentX + 1
@@ -51,29 +50,31 @@ export class Grid {
     }
 
     if (this.checkGameOver()) {
-      console.log('fin')
-      gameOver = true
-      reward = REWARD_WIN
-    } else if (this.world[this.agentY][this.agentX] === 1) {
-      reward = REWARD_WALL
+      if (this.world[this.agentY][this.agentX] === 1) {
+        reward = REWARD_WIN
+      } else if (this.world[this.agentY][this.agentX] === - 1) {
+        reward = REWARD_WALL
+      }
     }
 
+
     nextState = this.agentX + this.agentY * SIZE_GRID
-    return {reward: reward, nextState: nextState, gameOver: gameOver}
+    return {reward: reward, nextState: nextState}
   }
 
-  checkGameOver = () => this.world[this.agentY][this.agentX] === 1
+  checkGameOver = () => this.world[this.agentY][this.agentX] === 1 || this.world[this.agentY][this.agentX] === - 1
   // TODO: colorer rouge vert bonus malus
-  drawEnvironnement = (ctx, canvas) => {
+  // TODO: GRID CSS
+  drawEnvironnement = (ctx, canvas, QTable) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    // Drawing Agent position
-    ctx.fillStyle = "#000000"
-    ctx.fillRect(
-      DRAWING_OFFSET_X + this.agentX * DRAWING_SIZE_CASE,
-      DRAWING_OFFSET_Y + this.agentY * DRAWING_SIZE_CASE,
-      DRAWING_SIZE_CASE,
-      DRAWING_SIZE_CASE
-    )
+    // // Drawing Agent position
+    // ctx.fillStyle = "#000000"
+    // ctx.fillRect(
+    //   DRAWING_OFFSET_X + this.agentX * DRAWING_SIZE_CASE,
+    //   DRAWING_OFFSET_Y + this.agentY * DRAWING_SIZE_CASE,
+    //   DRAWING_SIZE_CASE,
+    //   DRAWING_SIZE_CASE
+    // )
 
     // Draw the background grid skeleton
     ctx.strokeStyle = "#aaaaaa"
@@ -85,6 +86,45 @@ export class Grid {
           DRAWING_SIZE_CASE,
           DRAWING_SIZE_CASE
         )
+      }
+    }
+
+    ctx.strokeStyle = "#aaaaaa"
+    for (let i = 0; i < SIZE_GRID; i++) {
+      for (let j = 0; j < SIZE_GRID; j++) {
+        if (this.world[j][i] === 1) {
+          ctx.fillStyle = "#00ff00"
+          ctx.beginPath()
+          ctx.arc(DRAWING_OFFSET_X + i * DRAWING_SIZE_CASE + DRAWING_SIZE_CASE / 2, DRAWING_OFFSET_Y + j * DRAWING_SIZE_CASE + DRAWING_SIZE_CASE / 2, 10, 0, Math.PI*2);
+          ctx.fill()
+        }
+        if (this.world[j][i] === - 1) {
+          ctx.fillStyle = "#ff0000"
+          ctx.beginPath()
+          ctx.arc(DRAWING_OFFSET_X + i * DRAWING_SIZE_CASE + DRAWING_SIZE_CASE / 2, DRAWING_OFFSET_Y + j * DRAWING_SIZE_CASE + DRAWING_SIZE_CASE / 2, 10, 0, Math.PI*2);
+          ctx.fill()
+        }
+      }
+    }
+
+    ////////////////////
+    // QTable drawing //
+    ////////////////////
+    for (let i = 0; i < SIZE_GRID; i++) {
+      for (let j = 0; j < SIZE_GRID; j++) {
+        let state = i + j * SIZE_GRID
+        let a = 0
+        ctx.fillStyle = QTable[state][ACTION_RIGHT] >= 0 ? `rgba(0, 255, 0, ${QTable[state][ACTION_RIGHT]})` : `rgba(255, 0, 0, ${Math.abs(QTable[state][ACTION_RIGHT])})`
+        ctx.fillText(QTable[state][ACTION_RIGHT].toFixed(2), DRAWING_OFFSET_X + i * DRAWING_SIZE_CASE + 45, DRAWING_OFFSET_Y + j * DRAWING_SIZE_CASE + 45)
+
+        ctx.fillStyle = QTable[state][ACTION_TOP] >= 0 ? `rgba(0, 255, 0, ${QTable[state][ACTION_TOP]})` : `rgba(255, 0, 0, ${Math.abs(QTable[state][ACTION_TOP])})`
+        ctx.fillText(QTable[state][ACTION_TOP].toFixed(2), DRAWING_OFFSET_X + i * DRAWING_SIZE_CASE + 25, DRAWING_OFFSET_Y + j * DRAWING_SIZE_CASE + 15)
+
+        ctx.fillStyle = QTable[state][ACTION_LEFT] >= 0 ? `rgba(0, 255, 0, ${QTable[state][ACTION_LEFT]})` : `rgba(255, 0, 0, ${Math.abs(QTable[state][ACTION_LEFT])})`
+        ctx.fillText(QTable[state][ACTION_LEFT].toFixed(2), DRAWING_OFFSET_X + i * DRAWING_SIZE_CASE + 3, DRAWING_OFFSET_Y + j * DRAWING_SIZE_CASE + 45)
+
+        ctx.fillStyle = QTable[state][ACTION_BOTTOM] >= 0 ? `rgba(0, 255, 0, ${QTable[state][ACTION_BOTTOM]})` : `rgba(255, 0, 0, ${Math.abs(QTable[state][ACTION_BOTTOM])})`
+        ctx.fillText(QTable[state][ACTION_BOTTOM].toFixed(2), DRAWING_OFFSET_X + i * DRAWING_SIZE_CASE + 25, DRAWING_OFFSET_Y + j * DRAWING_SIZE_CASE + 70)
       }
     }
   }

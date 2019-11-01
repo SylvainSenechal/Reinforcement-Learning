@@ -2,14 +2,16 @@ import {ALL_ACTIONS, NB_ACTION, SIZE_GRID} from './grid.js'
 
 const LEARNING_RATE = 0.01
 const GAMMA = 0.98
-const EPOCH = 500
+const EPOCH = 10000
 const EPSILON_PICK_ACTION_FULL_GREEDY = 0
 
 // TODO: epsilon
 export default class Agent {
-  constructor(environnement) {
+  constructor(environnement, canvas, ctx) {
     this.environnement = environnement
     this.QTable = new Array(SIZE_GRID*SIZE_GRID).fill().map( () => new Array(NB_ACTION).fill(0))
+    this.canvas = canvas
+    this.ctx = ctx
   }
 
   pickActionEpsilonGreedy = (epsilon, currentState) => {
@@ -24,7 +26,7 @@ export default class Agent {
 
   playStep = (epsilon, currentState) => {
     let action = this.pickActionEpsilonGreedy(epsilon, currentState)
-    let {reward, nextState, gameOver} = this.environnement.step(action)
+    let {reward, nextState} = this.environnement.step(action)
     // console.log(reward)
     // console.log(nextState)
     // console.log(gameOver)
@@ -37,7 +39,8 @@ export default class Agent {
       let currentState = this.environnement.getState()
 
       while (!this.environnement.checkGameOver()) {
-        let epsilon = 0.5
+        // this.environnement.drawEnvironnement(this.ctx, this.canvas)
+        let epsilon = 0.99
         let {reward, nextState, action} = this.playStep(epsilon, currentState)
         let nextAction = this.pickActionEpsilonGreedy(EPSILON_PICK_ACTION_FULL_GREEDY, currentState)
 
