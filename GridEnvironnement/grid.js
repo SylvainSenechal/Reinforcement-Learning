@@ -4,30 +4,42 @@ export const ACTION_LEFT = 2
 export const ACTION_BOTTOM = 3
 export const ALL_ACTIONS = [ACTION_RIGHT, ACTION_TOP, ACTION_LEFT, ACTION_BOTTOM]
 export const NB_ACTION = ALL_ACTIONS.length
-export const SIZE_GRID = 3
+export const SIZE_GRID = 10
 
 const REWARD_WIN = 1
-const REWARD_WALL = - 1
+const REWARD_BAD_SPOT = - 1
+const NB_BAD_SPOT_REWARD = 18
 
-const DRAWING_OFFSET_X = 500 // pixels offset for drawing the whole scene in the middle of the page
+const DRAWING_OFFSET_X = 50 // pixels offset for drawing the whole scene in the middle of the page
 const DRAWING_OFFSET_Y = 50
 const DRAWING_SIZE_CASE = 80 // number of pixels per case (1 case => 40x40 pixels)
 
 export class Grid {
   constructor() {
-    this.world = [
-      [0, 0, 1],
-      [0, -1, 0],
-      [0, 0, 0]
-    ]
-    this.agentX = 1
-    this.agentY = 1
+    this.world = this.createWorld()
+  }
 
+  createWorld = () => {
+    let map = new Array(SIZE_GRID).fill().map( () => new Array(SIZE_GRID).fill(0))
+    map[0][SIZE_GRID - 1] = REWARD_WIN // TOP RIGHT reward
+    this.agentX = 0
+    this.agentY = SIZE_GRID - 1 // Agent Starting LEFT BOTTOM
+    // Adding some bad reward spots :
+    let spotAdded = 0
+    while (spotAdded < NB_BAD_SPOT_REWARD) {
+      let x = Math.floor(Math.random() * SIZE_GRID)
+      let y = Math.floor(Math.random() * SIZE_GRID)
+      if (map[x][y] === 0 && !(x === SIZE_GRID - 1 && y === 0)) { // Adding spot only where place is available
+        map[x][y] = REWARD_BAD_SPOT
+        spotAdded += 1
+      }
+    }
+    return map
   }
 
   reset = () => {
     this.agentX = 0
-    this.agentY = 2
+    this.agentY = SIZE_GRID - 1// Agent Starting LEFT BOTTOM
   }
 
   getState = () => this.agentX + this.agentY * SIZE_GRID
@@ -50,10 +62,10 @@ export class Grid {
     }
 
     if (this.checkGameOver()) {
-      if (this.world[this.agentY][this.agentX] === 1) {
+      if (this.world[this.agentY][this.agentX] === REWARD_WIN) {
         reward = REWARD_WIN
-      } else if (this.world[this.agentY][this.agentX] === - 1) {
-        reward = REWARD_WALL
+      } else if (this.world[this.agentY][this.agentX] === REWARD_BAD_SPOT) {
+        reward = REWARD_BAD_SPOT
       }
     }
 

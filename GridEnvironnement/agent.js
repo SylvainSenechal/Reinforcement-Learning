@@ -1,17 +1,16 @@
 import {ALL_ACTIONS, NB_ACTION, SIZE_GRID} from './grid.js'
 
 const LEARNING_RATE = 0.01
-const GAMMA = 0.98
-const EPOCH = 10000
+const GAMMA = 0.95
+const EPOCH = 2000
 const EPSILON_PICK_ACTION_FULL_GREEDY = 0
 
 // TODO: epsilon
 export default class Agent {
-  constructor(environnement, canvas, ctx) {
+  constructor(environnement) {
     this.environnement = environnement
     this.QTable = new Array(SIZE_GRID*SIZE_GRID).fill().map( () => new Array(NB_ACTION).fill(0))
-    this.canvas = canvas
-    this.ctx = ctx
+    this.nbEpoch = 0
   }
 
   pickActionEpsilonGreedy = (epsilon, currentState) => {
@@ -35,19 +34,19 @@ export default class Agent {
 
   train = () => {
     for (let i = 0; i < EPOCH; i++) {
+      this.nbEpoch++
+      if (this.nbEpoch % 10000 === 0) console.log(this.nbEpoch)
       this.environnement.reset()
       let currentState = this.environnement.getState()
 
       while (!this.environnement.checkGameOver()) {
-        // this.environnement.drawEnvironnement(this.ctx, this.canvas)
-        let epsilon = 0.99
+        let epsilon = 0.5
         let {reward, nextState, action} = this.playStep(epsilon, currentState)
-        let nextAction = this.pickActionEpsilonGreedy(EPSILON_PICK_ACTION_FULL_GREEDY, currentState)
+        let nextAction = this.pickActionEpsilonGreedy(EPSILON_PICK_ACTION_FULL_GREEDY, nextState)
 
         this.QTable[currentState][action] = this.QTable[currentState][action] + LEARNING_RATE * (reward + GAMMA * this.QTable[nextState][nextAction] - this.QTable[currentState][action])
         currentState = nextState
       }
     }
-    console.log(this.QTable)
   }
 }
