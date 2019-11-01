@@ -1,3 +1,4 @@
+// TODO: best path drawing
 import {Grid} from './grid.js'
 import Agent from './agent.js'
 
@@ -9,14 +10,13 @@ ctx.font = '15px serif'
 
 const environnement = new Grid()
 const agentGrid = new Agent(environnement)
-
 window.agentGrid = agentGrid
+
 const loop = () => {
   agentGrid.environnement.drawEnvironnement(ctx, canvas, agentGrid.QTable) // Draw the game
   agentGrid.train()
+  agentGrid.drawBestPath(ctx, canvas)
   requestAnimationFrame(loop)
 }
-
-// agentGrid.train()
 
 loop()

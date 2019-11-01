@@ -6,13 +6,14 @@ export const ALL_ACTIONS = [ACTION_RIGHT, ACTION_TOP, ACTION_LEFT, ACTION_BOTTOM
 export const NB_ACTION = ALL_ACTIONS.length
 export const SIZE_GRID = 10
 
+export const DRAWING_OFFSET_X = 50 // pixels offset for drawing the whole scene in the middle of the page
+export const DRAWING_OFFSET_Y = 50
+export const DRAWING_SIZE_CASE = 80 // number of pixels per case (1 case => 40x40 pixels)
+
 const REWARD_WIN = 1
 const REWARD_BAD_SPOT = - 1
 const NB_BAD_SPOT_REWARD = 18
 
-const DRAWING_OFFSET_X = 50 // pixels offset for drawing the whole scene in the middle of the page
-const DRAWING_OFFSET_Y = 50
-const DRAWING_SIZE_CASE = 80 // number of pixels per case (1 case => 40x40 pixels)
 
 export class Grid {
   constructor() {
@@ -75,35 +76,23 @@ export class Grid {
   }
 
   checkGameOver = () => this.world[this.agentY][this.agentX] === 1 || this.world[this.agentY][this.agentX] === - 1
-  // TODO: colorer rouge vert bonus malus
-  // TODO: GRID CSS
-  drawEnvironnement = (ctx, canvas, QTable) => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    // // Drawing Agent position
-    // ctx.fillStyle = "#000000"
-    // ctx.fillRect(
-    //   DRAWING_OFFSET_X + this.agentX * DRAWING_SIZE_CASE,
-    //   DRAWING_OFFSET_Y + this.agentY * DRAWING_SIZE_CASE,
-    //   DRAWING_SIZE_CASE,
-    //   DRAWING_SIZE_CASE
-    // )
 
-    // Draw the background grid skeleton
+  drawEnvironnement = (ctx, canvas, QTable) => {
+    // TODO: GRID CSS
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
     ctx.strokeStyle = "#aaaaaa"
     for (let i = 0; i < SIZE_GRID; i++) {
       for (let j = 0; j < SIZE_GRID; j++) {
+        // Draw the background grid skeleton
         ctx.strokeRect(
           DRAWING_OFFSET_X + i * DRAWING_SIZE_CASE,
           DRAWING_OFFSET_Y + j * DRAWING_SIZE_CASE,
           DRAWING_SIZE_CASE,
           DRAWING_SIZE_CASE
         )
-      }
-    }
 
-    ctx.strokeStyle = "#aaaaaa"
-    for (let i = 0; i < SIZE_GRID; i++) {
-      for (let j = 0; j < SIZE_GRID; j++) {
+        // Draw target reward and malus case
         if (this.world[j][i] === 1) {
           ctx.fillStyle = "#00ff00"
           ctx.beginPath()
@@ -125,7 +114,6 @@ export class Grid {
     for (let i = 0; i < SIZE_GRID; i++) {
       for (let j = 0; j < SIZE_GRID; j++) {
         let state = i + j * SIZE_GRID
-        let a = 0
         ctx.fillStyle = QTable[state][ACTION_RIGHT] >= 0 ? `rgba(0, 255, 0, ${QTable[state][ACTION_RIGHT]})` : `rgba(255, 0, 0, ${Math.abs(QTable[state][ACTION_RIGHT])})`
         ctx.fillText(QTable[state][ACTION_RIGHT].toFixed(2), DRAWING_OFFSET_X + i * DRAWING_SIZE_CASE + 45, DRAWING_OFFSET_Y + j * DRAWING_SIZE_CASE + 45)
 
