@@ -1,4 +1,4 @@
-const SIZE = 16 // the size of the grid will be SIZE*SIZE
+const SIZE = 8 // the size of the grid will be SIZE*SIZE
 
 const SIZE_CASE = 40 // number of pixels per case (1 case => 40x40 pixels)
 const OFFSET_X = 500 // pixels offset for drawing the whole scene in the middle of the page
@@ -21,6 +21,7 @@ export default class Snake {
   reset = () => {
     this.createSnake()
     this.addFood()
+    this.direction = 0
     console.log('reset')
   }
 
@@ -121,9 +122,7 @@ export default class Snake {
   }
 
   step = action => {
-    // console.log(action)
     this.updateDirection(action)
-
     let lengthSnake = this.snake.length
     // Moving the head
     if (this.direction === 0) { // going right
@@ -163,6 +162,9 @@ export default class Snake {
     } else {
       this.snake.shift()
     }
+    // if (this.snake[lengthSnake-1][1] === 1 && this.snake[lengthSnake-1][0] === 1) {
+    //   reward = 10000
+    // }
 
     let nextState = this.getState()
     return {nextState, reward, gameOver}
@@ -174,7 +176,7 @@ export default class Snake {
     //   "foodPos": [this.foodX, this.foodY]
     // }
     return {
-      "bodySnake": this.snake.slice(), // TODO: check slice
+      "bodySnake": [...this.snake],//.slice(), // TODO: check slice
       "foodPos": [this.foodX, this.foodY]
     }
   }
