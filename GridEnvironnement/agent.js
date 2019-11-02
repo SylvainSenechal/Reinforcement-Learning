@@ -87,7 +87,6 @@ export default class Agent {
     // Best Path drawing //
     ///////////////////////
     let bestPath = this.reconstructBestPath()
-    console.log(bestPath)
     ctx.strokeStyle = "#ff00ff"
     ctx.beginPath()
     ctx.moveTo(
