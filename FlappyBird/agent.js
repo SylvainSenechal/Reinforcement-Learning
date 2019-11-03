@@ -1,5 +1,5 @@
 import {ALL_ACTIONS, NB_ACTION, SIZE_GRID} from './grid.js'
-import {DRAWING_OFFSET_X, DRAWING_OFFSET_Y, DRAWING_SIZE_CASE} from './grid.js'
+// import {DRAWING_OFFSET_X, DRAWING_OFFSET_Y, DRAWING_SIZE_CASE} from './grid.js'
 
 const LEARNING_RATE = 0.01
 const GAMMA = 0.95
@@ -27,9 +27,7 @@ export default class Agent {
   playStep = (epsilon, currentState) => {
     let action = this.pickActionEpsilonGreedy(epsilon, currentState)
     let {reward, nextState} = this.environnement.step(action)
-    // console.log(reward)
-    // console.log(nextState)
-    // console.log(gameOver)
+
     return {reward: reward, nextState: nextState, action: action}
   }
 
@@ -49,36 +47,6 @@ export default class Agent {
         currentState = nextState
       }
     }
-  }
-
-  reconstructBestPath = () => {
-    let targetReached = false
-    let path = [[0, SIZE_GRID - 1]]
-    let iteration = 0
-    while (!targetReached && iteration < 50) { // While we are have not reached the target
-      iteration++
-      let currentCasePath = path[path.length - 1]
-      let currentState = currentCasePath[0] + currentCasePath[1] * SIZE_GRID
-      if (currentState <= 0 || currentState >= SIZE_GRID * SIZE_GRID) {
-        continue
-      }
-      let bestAction = ALL_ACTIONS[this.argMax(this.QTable[currentState])]
-
-      if (bestAction === 0) {
-        path.push([currentCasePath[0] + 1, currentCasePath[1]])
-      } else if (bestAction === 1) {
-        path.push([currentCasePath[0], currentCasePath[1] - 1])
-      } else if (bestAction === 2) {
-        path.push([currentCasePath[0] - 1, currentCasePath[1]])
-      } else if (bestAction === 3) {
-        path.push([currentCasePath[0], currentCasePath[1] + 1])
-      }
-
-      if (path[path.length - 1][0] === SIZE_GRID - 1 && path[path.length - 1][1] === 0) {
-        targetReached = true
-      }
-    }
-    return path
   }
 
   drawBestPath = (ctx, canvas) => {

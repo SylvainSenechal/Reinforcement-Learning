@@ -7,13 +7,23 @@ ctx.canvas.width = window.innerWidth
 ctx.canvas.height = window.innerHeight
 // ctx.font = '15px serif'
 
-const environnement = new FlappyBird()
+const environnement = new FlappyBird(ctx, canvas)
 const agentFlappyBird = new Agent(environnement)
 window.agentFlappyBird = agentFlappyBird
 
+let action = 0
+document.onkeydown = key => {
+  action = 1
+}
+
+document.onkeyup = key => {
+  action = 0
+}
+
 const loop = () => {
-  agentFlappyBird.environnement.drawEnvironnement(ctx, canvas) // Draw the game
-	agentFlappyBird.environnement.step(0)
+  agentFlappyBird.environnement.drawEnvironnement() // Draw the game
+	agentFlappyBird.environnement.step(action)
+  agentFlappyBird.environnement.getState()
   requestAnimationFrame(loop)
 }
 
