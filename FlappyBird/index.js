@@ -23,24 +23,7 @@ document.onkeyup = key => {
 const loop = () => {
   agentFlappyBird.environnement.drawEnvironnement() // Draw the game
 	agentFlappyBird.environnement.step(action)
-  agentFlappyBird.environnement.getState()
   requestAnimationFrame(loop)
 }
-
+agentFlappyBird.train()
 loop()
-
-
-// function loop(){ // Voir l'ordre des fonctions
-// 	createPipes()
-//
-// 	gravity()
-//   updatePipesPosition()
-//   removePastPipes() // attention a l'ordre collision et remove pipes
-//   collisions()
-//   updateScore()
-//
-//   restoreGame()
-//   dessin();
-//
-//   requestAnimationFrame(loop);
-// }

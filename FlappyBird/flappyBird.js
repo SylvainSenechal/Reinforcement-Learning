@@ -4,9 +4,9 @@ const DRAWING_OFFSET_Y = 150
 const WIDTH_GAME = 600
 const HEIGHT_GAME = 400
 
-const PIPE_WIDTH = 60
+const PIPE_WIDTH = 62
 const TICK_BETWEEN_NEW_PIPE = 100
-const HOLE_PIPE_PERCENTAGE = 0.32
+const HOLE_PIPE_PERCENTAGE = 0.45 // 0.32
 const SPEED_PIPES = 3
 
 const ACTION_DONT_FLY = 0
@@ -15,7 +15,7 @@ export const ALL_ACTIONS = [ACTION_DONT_FLY, ACTION_FLY]
 export const NB_ACTION = ALL_ACTIONS.length
 
 const REWARD_STILL_ALIVE = 1
-const REWARD_DEATH = - 1
+const REWARD_DEATH = - 1000
 
 const SIZE_BIRD = 25
 const GRAVITY_POWER = 0.5
@@ -29,16 +29,30 @@ export class FlappyBird {
 		this.canvas = canvas
 
 		this.birdX = DRAWING_OFFSET_X + 50
-		this.birdY = DRAWING_OFFSET_Y + 300 // jeu.positionY + this.size + (jeu.height-this.size)*Math.random()
+		this.birdY = DRAWING_OFFSET_Y + 300
 		this.birdVerticalSpeed = 0
 
 		this.listPipes = []
 		this.timeLastPipeCreated = - TICK_BETWEEN_NEW_PIPE
+		this.createPipe()
 		this.tick = 0
 	}
 
+	reset = () => {
+		// console.log(this.tick)
+		// console.log('RESET')
+		this.birdX = DRAWING_OFFSET_X + 50
+		this.birdY = DRAWING_OFFSET_Y + 300
+		this.birdVerticalSpeed = 0
+
+		this.listPipes = []
+		this.tick = 0
+		this.timeLastPipeCreated = - TICK_BETWEEN_NEW_PIPE
+		this.createPipe()
+	}
+
 	createPipe = () => {
-		if (this.timeLastPipeCreated + TICK_BETWEEN_NEW_PIPE < this.tick) {
+		if (this.timeLastPipeCreated + TICK_BETWEEN_NEW_PIPE <= this.tick) {
 			let h1Part = Math.random() * (1 - HOLE_PIPE_PERCENTAGE)
 			let height1 = HEIGHT_GAME * h1Part
 			let height2 = HEIGHT_GAME - height1 - HOLE_PIPE_PERCENTAGE * HEIGHT_GAME
@@ -67,7 +81,7 @@ export class FlappyBird {
 		}
 	}
 
-	checkCollisionPipe = () => {
+	checkGameOver = () => {
 		var midPipe = this.listPipes[0].x + (this.listPipes[0].width / 2)
 		var widthHalfPipe = midPipe - this.listPipes[0].x
 		if (Math.abs(midPipe - this.birdX) < (SIZE_BIRD + widthHalfPipe)) { // Si on est au niveau du pipe
@@ -99,51 +113,63 @@ export class FlappyBird {
 		this.tick++
 		this.createPipe()
 		this.moveBird(action)
-		this.checkCollisionPipe()
+		let gameOver = this.checkGameOver()
+		let reward
+		if (gameOver) {
+			reward = REWARD_DEATH
+		} else {
+			reward = REWARD_STILL_ALIVE
+		}
 		this.updatePipesPosition()
 		this.removePastPipes()
-		// return {reward: reward, nextState: nextState}
+
+		let nextState = this.getState()
+		return {reward: reward, nextState: nextState}
 	}
 
 	getState = () => {
 		// Getting the green value of a pixel
 		let state1 = this.ctx.getImageData(this.birdX + 50, HEIGHT_GAME / 2, 1, 1).data[1] === 0 ? 0 : 1
-		let state2 = this.ctx.getImageData(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 40, 1, 1).data[1] === 0 ? 0 : 1
-		let state3 = this.ctx.getImageData(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 40, 1, 1).data[1] === 0 ? 0 : 1
-		let state4 = this.ctx.getImageData(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 80, 1, 1).data[1] === 0 ? 0 : 1
-		let state5 = this.ctx.getImageData(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 80, 1, 1).data[1] === 0 ? 0 : 1
+		let state2 = this.ctx.getImageData(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 60, 1, 1).data[1] === 0 ? 0 : 1
+		let state3 = this.ctx.getImageData(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 60, 1, 1).data[1] === 0 ? 0 : 1
+		let state4 = this.ctx.getImageData(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 120, 1, 1).data[1] === 0 ? 0 : 1
+		let state5 = this.ctx.getImageData(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 120, 1, 1).data[1] === 0 ? 0 : 1
+		let state6 = this.ctx.getImageData(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 180, 1, 1).data[1] === 0 ? 0 : 1
+		let state7 = this.ctx.getImageData(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 180, 1, 1).data[1] === 0 ? 0 : 1
 
-		let state6 = this.ctx.getImageData(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y, 1, 1).data[1] === 0 ? 0 : 1
-		let state7 = this.ctx.getImageData(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 40, 1, 1).data[1] === 0 ? 0 : 1
-		let state8 = this.ctx.getImageData(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 40, 1, 1).data[1] === 0 ? 0 : 1
-		let state9 = this.ctx.getImageData(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 80, 1, 1).data[1] === 0 ? 0 : 1
-		let state10 = this.ctx.getImageData(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 80, 1, 1).data[1] === 0 ? 0 : 1
+		let state8 = this.ctx.getImageData(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y, 1, 1).data[1] === 0 ? 0 : 1
+		let state9 = this.ctx.getImageData(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 60, 1, 1).data[1] === 0 ? 0 : 1
+		let state10 = this.ctx.getImageData(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 60, 1, 1).data[1] === 0 ? 0 : 1
 		let state11 = this.ctx.getImageData(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 120, 1, 1).data[1] === 0 ? 0 : 1
 		let state12 = this.ctx.getImageData(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 120, 1, 1).data[1] === 0 ? 0 : 1
+		let state13 = this.ctx.getImageData(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 180, 1, 1).data[1] === 0 ? 0 : 1
+		let state14 = this.ctx.getImageData(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 180, 1, 1).data[1] === 0 ? 0 : 1
 
-		let state13 = this.ctx.getImageData(this.birdX + 150, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y, 1, 1).data[1] === 0 ? 0 : 1
-		let state14 = this.ctx.getImageData(this.birdX + 150, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 60, 1, 1).data[1] === 0 ? 0 : 1
-		let state15 = this.ctx.getImageData(this.birdX + 150, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 60, 1, 1).data[1] === 0 ? 0 : 1
-		let state16 = this.ctx.getImageData(this.birdX + 150, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 120, 1, 1).data[1] === 0 ? 0 : 1
-		let state17 = this.ctx.getImageData(this.birdX + 150, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 120, 1, 1).data[1] === 0 ? 0 : 1
-		let state18 = this.ctx.getImageData(this.birdX + 150, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 180, 1, 1).data[1] === 0 ? 0 : 1
-		let state19 = this.ctx.getImageData(this.birdX + 150, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 180, 1, 1).data[1] === 0 ? 0 : 1
+		// let state15 = this.ctx.getImageData(this.birdX + 150, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y, 1, 1).data[1] === 0 ? 0 : 1
+		// let state16 = this.ctx.getImageData(this.birdX + 150, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 60, 1, 1).data[1] === 0 ? 0 : 1
+		// let state17 = this.ctx.getImageData(this.birdX + 150, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 60, 1, 1).data[1] === 0 ? 0 : 1
+		// let state18 = this.ctx.getImageData(this.birdX + 150, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 120, 1, 1).data[1] === 0 ? 0 : 1
+		// let state19 = this.ctx.getImageData(this.birdX + 150, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 120, 1, 1).data[1] === 0 ? 0 : 1
+		// let state20 = this.ctx.getImageData(this.birdX + 150, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 180, 1, 1).data[1] === 0 ? 0 : 1
+		// let state21 = this.ctx.getImageData(this.birdX + 150, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 180, 1, 1).data[1] === 0 ? 0 : 1
 
 		// TODO: inside draw
 		this.ctx.strokeStyle = "#cc00cc"
 		this.ctx.strokeRect(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y, 1, 1)
-		this.ctx.strokeRect(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 40, 1, 1)
-		this.ctx.strokeRect(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 40, 1, 1)
-		this.ctx.strokeRect(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 80, 1, 1)
-		this.ctx.strokeRect(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 80, 1, 1)
+		this.ctx.strokeRect(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 60, 1, 1)
+		this.ctx.strokeRect(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 60, 1, 1)
+		this.ctx.strokeRect(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 120, 1, 1)
+		this.ctx.strokeRect(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 120, 1, 1)
+		this.ctx.strokeRect(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 180, 1, 1)
+		this.ctx.strokeRect(this.birdX + 50, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 180, 1, 1)
 
 		this.ctx.strokeRect(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y, 1, 1)
-		this.ctx.strokeRect(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 40, 1, 1)
-		this.ctx.strokeRect(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 40, 1, 1)
-		this.ctx.strokeRect(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 80, 1, 1)
-		this.ctx.strokeRect(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 80, 1, 1)
+		this.ctx.strokeRect(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 60, 1, 1)
+		this.ctx.strokeRect(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 60, 1, 1)
 		this.ctx.strokeRect(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 120, 1, 1)
 		this.ctx.strokeRect(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 120, 1, 1)
+		this.ctx.strokeRect(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 180, 1, 1)
+		this.ctx.strokeRect(this.birdX + 100, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y - 180, 1, 1)
 
 		this.ctx.strokeRect(this.birdX + 150, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y, 1, 1)
 		this.ctx.strokeRect(this.birdX + 150, HEIGHT_GAME / 2 + DRAWING_OFFSET_Y + 60, 1, 1)
@@ -165,7 +191,7 @@ export class FlappyBird {
 				this.ctx.strokeRect(this.birdX - 25, i * HEIGHT_GAME / 16 + DRAWING_OFFSET_Y, SIZE_BIRD*2, HEIGHT_GAME / 16)
 			}
 		}
-		let state = "" + position.toString(2) + state1 + state2 + state3 + state4 + state5 + state6 + state7 + state8 + state9 + state10 + state11 + state12 + state13 + state14 + state15 + state16 + state17 + state18 + state19
+		let state = "" + position.toString(2) + state1 + state2 + state3 + state4 + state5 + state6 + state7 + state8 + state9 + state10 + state11 + state12 + state13 + state14// + state15 + state16 + state17 + state18 + state19 + state20 + state21
 		return parseInt(state, 2)
 	}
 

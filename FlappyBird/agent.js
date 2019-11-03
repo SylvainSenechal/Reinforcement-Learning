@@ -1,17 +1,20 @@
-import {ALL_ACTIONS, NB_ACTION, SIZE_GRID} from './grid.js'
+import {ALL_ACTIONS, NB_ACTION} from './grid.js'
 // import {DRAWING_OFFSET_X, DRAWING_OFFSET_Y, DRAWING_SIZE_CASE} from './grid.js'
 
-const LEARNING_RATE = 0.01
-const GAMMA = 0.95
-const EPOCH = 100
+const LEARNING_RATE = 0.2
+const GAMMA = 0.99
+const EPOCH = 2000
 const EPSILON_PICK_ACTION_FULL_GREEDY = 0
 
 // TODO: epsilon
 export default class Agent {
   constructor(environnement) {
     this.environnement = environnement
-    this.QTable = new Array(SIZE_GRID*SIZE_GRID).fill().map( () => new Array(NB_ACTION).fill(0))
+    // this.QTable = new Array(SIZE_GRID*SIZE_GRID).fill().map( () => new Array(NB_ACTION).fill(0))
+    this.QTable = new Array(Math.pow(2, 21 - 7 + 4)).fill().map( () => new Array(NB_ACTION).fill(0))
     this.nbEpoch = 0
+    this.nbUpdateQTable = 0
+    this.lastNbUpdate = 0
   }
 
   pickActionEpsilonGreedy = (epsilon, currentState) => {
@@ -32,41 +35,23 @@ export default class Agent {
   }
 
   train = () => {
+    console.log('nbUpd: ', this.nbUpdateQTable)
+    console.log('Diff : ', this.nbUpdateQTable - this.lastNbUpdate)
+    this.lastNbUpdate = this.nbUpdateQTable
     for (let i = 0; i < EPOCH; i++) {
       this.nbEpoch++
-      if (this.nbEpoch % 10000 === 0) console.log(this.nbEpoch)
+      if (this.nbEpoch % 100 === 0) console.log(this.nbEpoch)
       this.environnement.reset()
       let currentState = this.environnement.getState()
-
       while (!this.environnement.checkGameOver()) {
-        let epsilon = 0.5
+        let epsilon = 0.01
         let {reward, nextState, action} = this.playStep(epsilon, currentState)
         let nextAction = this.pickActionEpsilonGreedy(EPSILON_PICK_ACTION_FULL_GREEDY, nextState)
 
         this.QTable[currentState][action] = this.QTable[currentState][action] + LEARNING_RATE * (reward + GAMMA * this.QTable[nextState][nextAction] - this.QTable[currentState][action])
         currentState = nextState
+        this.nbUpdateQTable +=1
       }
     }
-  }
-
-  drawBestPath = (ctx, canvas) => {
-
-    ///////////////////////
-    // Best Path drawing //
-    ///////////////////////
-    let bestPath = this.reconstructBestPath()
-    ctx.strokeStyle = "#ff00ff"
-    ctx.beginPath()
-    ctx.moveTo(
-      DRAWING_OFFSET_X + DRAWING_SIZE_CASE / 2,
-      DRAWING_OFFSET_Y - DRAWING_SIZE_CASE / 2 + SIZE_GRID * DRAWING_SIZE_CASE
-    )
-    for (let i = 0; i < bestPath.length; i++) {
-      ctx.lineTo(
-        bestPath[i][0] * DRAWING_SIZE_CASE + DRAWING_OFFSET_X + DRAWING_SIZE_CASE / 2,
-        bestPath[i][1] * DRAWING_SIZE_CASE + DRAWING_OFFSET_Y + DRAWING_SIZE_CASE / 2
-      )
-    }
-    ctx.stroke()
   }
 }
