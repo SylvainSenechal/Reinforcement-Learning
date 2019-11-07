@@ -1,4 +1,4 @@
-const SIZE = 8 // the size of the grid will be SIZE*SIZE
+const SIZE = 12 // the size of the grid will be SIZE*SIZE
 
 const SIZE_CASE = 40 // number of pixels per case (1 case => 40x40 pixels)
 const OFFSET_X = 500 // pixels offset for drawing the whole scene in the middle of the page
@@ -31,7 +31,7 @@ export class Snake {
     this.direction = 0
   }
 
-  createGrid = () => new Array(SIZE).fill().map( () => new Array(SIZE).fill(0))
+  createGrid = () => new Array(SIZE).fill().map( () => new Uint8Array(SIZE)) //new Array(SIZE).fill().map( () => new Array(SIZE).fill(0))
 
   createSnake = () => { // Snake created in the middle
     this.snake = [
@@ -172,7 +172,7 @@ export class Snake {
 
 
     if (gameOver) {
-      let nextState = Math.pow(3, 9)
+      let nextState = Math.pow(3, 15)
       return {reward: REWARD_LOST, nextState: nextState}
     }
 
@@ -195,52 +195,76 @@ export class Snake {
   getState = () => {
     let headX = this.snake[this.snake.length - 1][0]
     let headY = this.snake[this.snake.length - 1][1]
-    let front1, front2, front3
-    let left1, left2, left3
-    let right1, right2, right3
+    let front1, front2, front3, front4, front5
+    let left1, left2, left3, left4, left5
+    let right1, right2, right3, right4, right5
     if (this.direction === 0) { // right
       front1 = headY + 1 >= SIZE ? 1 : this.grid[headX][headY + 1]
       front2 = headY + 2 >= SIZE ? 1 : this.grid[headX][headY + 2]
       front3 = headY + 3 >= SIZE ? 1 : this.grid[headX][headY + 3]
+      front4 = headY + 4 >= SIZE ? 1 : this.grid[headX][headY + 4]
+      front5 = headY + 5 >= SIZE ? 1 : this.grid[headX][headY + 5]
       left1 = headX - 1 < 0 ? 1 : this.grid[headX - 1][headY]
       left2 = headX - 2 < 0 ? 1 : this.grid[headX - 2][headY]
       left3 = headX - 3 < 0 ? 1 : this.grid[headX - 3][headY]
+      left4 = headX - 4 < 0 ? 1 : this.grid[headX - 4][headY]
+      left5 = headX - 5 < 0 ? 1 : this.grid[headX - 5][headY]
       right1 = headX + 1 >= SIZE ? 1 : this.grid[headX + 1][headY]
       right2 = headX + 2 >= SIZE ? 1 : this.grid[headX + 2][headY]
       right3 = headX + 3 >= SIZE ? 1 : this.grid[headX + 3][headY]
+      right4 = headX + 4 >= SIZE ? 1 : this.grid[headX + 4][headY]
+      right5 = headX + 5 >= SIZE ? 1 : this.grid[headX + 5][headY]
     } else if (this.direction === 1) { // top
       front1 = headX - 1 < 0 ? 1 : this.grid[headX - 1][headY]
       front2 = headX - 2 < 0 ? 1 : this.grid[headX - 2][headY]
       front3 = headX - 3 < 0 ? 1 : this.grid[headX - 3][headY]
+      front4 = headX - 4 < 0 ? 1 : this.grid[headX - 4][headY]
+      front5 = headX - 5 < 0 ? 1 : this.grid[headX - 5][headY]
       left1 = headY - 1 < 0 ? 1 : this.grid[headX][headY - 1]
       left2 = headY - 2 < 0 ? 1 : this.grid[headX][headY - 2]
       left3 = headY - 3 < 0 ? 1 : this.grid[headX][headY - 3]
+      left4 = headY - 4 < 0 ? 1 : this.grid[headX][headY - 4]
+      left5 = headY - 5 < 0 ? 1 : this.grid[headX][headY - 5]
       right1 = headY + 1 >= SIZE ? 1 : this.grid[headX][headY + 1]
       right2 = headY + 2 >= SIZE ? 1 : this.grid[headX][headY + 2]
       right3 = headY + 3 >= SIZE ? 1 : this.grid[headX][headY + 3]
+      right4 = headY + 4 >= SIZE ? 1 : this.grid[headX][headY + 4]
+      right5 = headY + 5 >= SIZE ? 1 : this.grid[headX][headY + 5]
     } else if (this.direction === 2) { // left
       front1 = headY - 1 < 0 ? 1 : this.grid[headX][headY - 1]
       front2 = headY - 2 < 0 ? 1 : this.grid[headX][headY - 2]
       front3 = headY - 3 < 0 ? 1 : this.grid[headX][headY - 3]
+      front4 = headY - 4 < 0 ? 1 : this.grid[headX][headY - 4]
+      front5 = headY - 5 < 0 ? 1 : this.grid[headX][headY - 5]
       left1 = headX + 1 >= SIZE ? 1 : this.grid[headX + 1][headY]
       left2 = headX + 2 >= SIZE ? 1 : this.grid[headX + 2][headY]
       left3 = headX + 3 >= SIZE ? 1 : this.grid[headX + 3][headY]
+      left4 = headX + 4 >= SIZE ? 1 : this.grid[headX + 4][headY]
+      left5 = headX + 5 >= SIZE ? 1 : this.grid[headX + 5][headY]
       right1 = headX - 1 < 0 ? 1 : this.grid[headX - 1][headY]
       right2 = headX - 2 < 0 ? 1 : this.grid[headX - 2][headY]
       right3 = headX - 3 < 0 ? 1 : this.grid[headX - 3][headY]
+      right4 = headX - 4 < 0 ? 1 : this.grid[headX - 4][headY]
+      right5 = headX - 5 < 0 ? 1 : this.grid[headX - 5][headY]
     } else {  // bottom
       front1 = headX + 1 >= SIZE ? 1 : this.grid[headX + 1][headY]
       front2 = headX + 2 >= SIZE ? 1 : this.grid[headX + 2][headY]
       front3 = headX + 3 >= SIZE ? 1 : this.grid[headX + 3][headY]
+      front4 = headX + 4 >= SIZE ? 1 : this.grid[headX + 4][headY]
+      front5 = headX + 5 >= SIZE ? 1 : this.grid[headX + 5][headY]
       left1 = headY + 1 >= SIZE ? 1 : this.grid[headX][headY + 1]
       left2 = headY + 2 >= SIZE ? 1 : this.grid[headX][headY + 2]
       left3 = headY + 3 >= SIZE ? 1 : this.grid[headX][headY + 3]
+      left4 = headY + 4 >= SIZE ? 1 : this.grid[headX][headY + 4]
+      left5 = headY + 5 >= SIZE ? 1 : this.grid[headX][headY + 5]
       right1 = headY - 1 < 0 ? 1 : this.grid[headX][headY - 1]
       right2 = headY - 2 < 0 ? 1 : this.grid[headX][headY - 2]
       right3 = headY - 3 < 0 ? 1 : this.grid[headX][headY - 3]
+      right4 = headY - 4 < 0 ? 1 : this.grid[headX][headY - 4]
+      right5 = headY - 5 < 0 ? 1 : this.grid[headX][headY - 5]
     }
 
-    let state = "" + front1 + front2 + front3 + left1 + left2 + left3 + right1 + right2 + right3
+    let state = "" + front1 + front2 + front3 + front4 + front5 + left1 + left2 + left3 + left4 + left5 + right1 + right2 + right3 + right4 + right5
     return parseInt(state, 3)
   }
 

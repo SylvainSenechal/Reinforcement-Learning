@@ -10,7 +10,7 @@ ctx.canvas.height = height
 
 const environnement = new Snake()
 const agentSnake = new Agent(environnement)
-
+window.agentSnake = agentSnake
 console.log(environnement)
 console.log(agentSnake)
 
@@ -22,7 +22,7 @@ document.onkeydown = key => {
 const loop = () => {
   agentSnake.environnement.tick++
   agentSnake.environnement.drawEnvironnement(ctx, canvas) // Draw the game
-  if (agentSnake.environnement.tick % 5 === 0) { // TODO: game loop in class
+  if (agentSnake.environnement.tick % 2 === 0) { // TODO: game loop in class
     agentSnake.playGreedy()
   }
 
