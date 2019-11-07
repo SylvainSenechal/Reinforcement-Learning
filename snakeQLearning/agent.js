@@ -1,20 +1,17 @@
-import {ALL_ACTIONS, NB_ACTION} from './flappyBird.js'
-// import {DRAWING_OFFSET_X, DRAWING_OFFSET_Y, DRAWING_SIZE_CASE} from './grid.js'
+import {ALL_ACTIONS, NB_ACTION} from './snakeGame.js'
 
-const LEARNING_RATE = 0.2
-const GAMMA = 0.99
-const EPOCH = 100
+const LEARNING_RATE = 0.5
+const GAMMA = 0.95
+const EPOCH = 100000
 const EPSILON_PICK_ACTION_FULL_GREEDY = 0
 
-// TODO: epsilon
+
 export default class Agent {
   constructor(environnement) {
     this.environnement = environnement
-    // this.QTable = new Array(SIZE_GRID*SIZE_GRID).fill().map( () => new Array(NB_ACTION).fill(0))
-    this.QTable = new Array(Math.pow(2, 21 - 7 + 4)).fill().map( () => new Array(NB_ACTION).fill(0))
+    // Size + 1 : Last state is the lost state
+    this.QTable = new Array(Math.pow(3, 9) + 1).fill().map( () => new Array(NB_ACTION).fill(0))
     this.nbEpoch = 0
-    this.nbUpdateQTable = 0
-    this.lastNbUpdate = 0
   }
 
   pickActionEpsilonGreedy = (epsilon, currentState) => {
@@ -27,30 +24,34 @@ export default class Agent {
 
   argMax = array => array.indexOf(Math.max(...array))
 
-  playStep = (epsilon, currentState) => {
+
+  playOneStep = (epsilon, currentState) => {
     let action = this.pickActionEpsilonGreedy(epsilon, currentState)
     let {reward, nextState} = this.environnement.step(action)
 
     return {reward: reward, nextState: nextState, action: action}
   }
 
+  playGreedy = () => {
+    let currentState = this.environnement.getState()
+    let action = this.pickActionEpsilonGreedy(0, currentState)
+    this.environnement.step(action)
+    if (this.environnement.checkGameOver()) this.environnement.reset()
+  }
+
   train = () => {
-    console.log('nbUpd: ', this.nbUpdateQTable)
-    console.log('Diff : ', this.nbUpdateQTable - this.lastNbUpdate)
-    this.lastNbUpdate = this.nbUpdateQTable
     for (let i = 0; i < EPOCH; i++) {
       this.nbEpoch++
-      if (this.nbEpoch % 100 === 0) console.log(this.nbEpoch)
+      if (this.nbEpoch % 10000 === 0) console.log(this.nbEpoch)
       this.environnement.reset()
       let currentState = this.environnement.getState()
+
       while (!this.environnement.checkGameOver()) {
         let epsilon = 0.01
-        let {reward, nextState, action} = this.playStep(epsilon, currentState)
+        let {reward, nextState, action} = this.playOneStep(epsilon, currentState)
         let nextAction = this.pickActionEpsilonGreedy(EPSILON_PICK_ACTION_FULL_GREEDY, nextState)
-
         this.QTable[currentState][action] = this.QTable[currentState][action] + LEARNING_RATE * (reward + GAMMA * this.QTable[nextState][nextAction] - this.QTable[currentState][action])
         currentState = nextState
-        this.nbUpdateQTable +=1
       }
     }
   }

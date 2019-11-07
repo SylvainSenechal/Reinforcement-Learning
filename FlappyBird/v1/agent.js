@@ -1,4 +1,4 @@
-import {ALL_ACTIONS, NB_ACTION} from './flappyBird.js'
+import {ALL_ACTIONS, NB_ACTION} from './grid.js'
 // import {DRAWING_OFFSET_X, DRAWING_OFFSET_Y, DRAWING_SIZE_CASE} from './grid.js'
 
 const LEARNING_RATE = 0.2
@@ -11,7 +11,7 @@ export default class Agent {
   constructor(environnement) {
     this.environnement = environnement
     // this.QTable = new Array(SIZE_GRID*SIZE_GRID).fill().map( () => new Array(NB_ACTION).fill(0))
-    this.QTable = new Array(Math.pow(2, 21 - 7 + 4)).fill().map( () => new Array(NB_ACTION).fill(0))
+    this.QTable = new Array(Math.pow(2, 21 - 7 - 7+ 4)).fill().map( () => new Array(NB_ACTION).fill(0))
     this.nbEpoch = 0
     this.nbUpdateQTable = 0
     this.lastNbUpdate = 0
