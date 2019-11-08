@@ -1,4 +1,6 @@
-import {ALL_ACTIONS, NB_ACTION} from './snakeGame.js'
+import {ALL_ACTIONS, NB_ACTION, SIGHT} from './snakeGame.js'
+import {RIGHT, TOP, LEFT, BOTTOM} from './snakeGame.js'
+import {OFFSET_X, OFFSET_Y, SIZE_CASE} from './snakeGame.js'
 
 const LEARNING_RATE = 0.01
 const GAMMA = 0.8
@@ -75,6 +77,53 @@ export default class Agent {
         let nextAction = this.pickActionEpsilonGreedy(EPSILON_PICK_ACTION_FULL_GREEDY, nextState)
         this.QTable[currentState][action] = this.QTable[currentState][action] + LEARNING_RATE * (reward + GAMMA * this.QTable[nextState][nextAction] - this.QTable[currentState][action])
         currentState = nextState
+      }
+    }
+  }
+  // for (let i = 0; i < this.snake.length - 1; i++) {
+  //   ctx.fillRect(OFFSET_X+this.snake[i][1]*SIZE_CASE, OFFSET_Y+this.snake[i][0]*SIZE_CASE, SIZE_CASE, SIZE_CASE)
+  // }
+  drawQTable = (ctx, canvas) => {
+    let headX = this.environnement.snake[this.environnement.snake.length - 1][0]
+    let headY = this.environnement.snake[this.environnement.snake.length - 1][1]
+    ctx.fillStyle = 'rgba(125, 135, 150, 0.5)'
+    let currentState = this.environnement.getState()
+    let actions = this.QTable[currentState]
+    if (this.environnement.direction === RIGHT) {
+      for (let i = 1; i < SIGHT + 1; i++) {
+        ctx.fillRect(OFFSET_X + (headY + i) * SIZE_CASE, OFFSET_Y + headX * SIZE_CASE, SIZE_CASE, SIZE_CASE) // front
+        ctx.fillRect(OFFSET_X + headY * SIZE_CASE, OFFSET_Y + (headX - i) * SIZE_CASE, SIZE_CASE, SIZE_CASE) // left
+        ctx.fillRect(OFFSET_X + headY * SIZE_CASE, OFFSET_Y + (headX + i) * SIZE_CASE, SIZE_CASE, SIZE_CASE) // right
+        ctx.fillText(actions[0].toFixed(2), 5 + OFFSET_X + (headY + 1) * SIZE_CASE, 25 + OFFSET_Y + headX * SIZE_CASE) // front
+        ctx.fillText(actions[1].toFixed(2), 5 + OFFSET_X + headY * SIZE_CASE, 25 + OFFSET_Y + (headX - 1) * SIZE_CASE) // left
+        ctx.fillText(actions[2].toFixed(2), 5 + OFFSET_X + headY * SIZE_CASE, 25 + OFFSET_Y + (headX + 1) * SIZE_CASE) // right
+      }
+    } else if (this.environnement.direction === TOP) {
+      for (let i = 1; i < SIGHT + 1; i++) {
+        ctx.fillRect(OFFSET_X + headY * SIZE_CASE, OFFSET_Y + (headX - i) * SIZE_CASE, SIZE_CASE, SIZE_CASE)
+        ctx.fillRect(OFFSET_X + (headY - i) * SIZE_CASE, OFFSET_Y + headX * SIZE_CASE, SIZE_CASE, SIZE_CASE)
+        ctx.fillRect(OFFSET_X + (headY + i)* SIZE_CASE, OFFSET_Y + headX * SIZE_CASE, SIZE_CASE, SIZE_CASE)
+        ctx.fillText(actions[0].toFixed(2), 5 + OFFSET_X + headY * SIZE_CASE, 25 + OFFSET_Y + (headX - 1) * SIZE_CASE) // front
+        ctx.fillText(actions[1].toFixed(2), 5 + OFFSET_X + (headY - 1) * SIZE_CASE, 25 + OFFSET_Y + headX * SIZE_CASE) // left
+        ctx.fillText(actions[2].toFixed(2), 5 + OFFSET_X + (headY + 1)* SIZE_CASE, 25 + OFFSET_Y + headX * SIZE_CASE) // right
+      }
+    } else if (this.environnement.direction === LEFT) {
+      for (let i = 1; i < SIGHT + 1; i++) {
+        ctx.fillRect(OFFSET_X + (headY - i) * SIZE_CASE, OFFSET_Y + headX * SIZE_CASE, SIZE_CASE, SIZE_CASE)
+        ctx.fillRect(OFFSET_X + headY * SIZE_CASE, OFFSET_Y + (headX + i) * SIZE_CASE, SIZE_CASE, SIZE_CASE)
+        ctx.fillRect(OFFSET_X + headY * SIZE_CASE, OFFSET_Y + (headX - i) * SIZE_CASE, SIZE_CASE, SIZE_CASE)
+        ctx.fillText(actions[0].toFixed(2), 5 + OFFSET_X + (headY - 1) * SIZE_CASE, 25 + OFFSET_Y + headX * SIZE_CASE) // front
+        ctx.fillText(actions[1].toFixed(2), 5 + OFFSET_X + headY * SIZE_CASE, 25 + OFFSET_Y + (headX + 1) * SIZE_CASE) // left
+        ctx.fillText(actions[2].toFixed(2), 5 + OFFSET_X + headY * SIZE_CASE, 25 + OFFSET_Y + (headX - 1) * SIZE_CASE) // right
+      }
+    } else {  // bottom
+      for (let i = 1; i < SIGHT + 1; i++) {
+        ctx.fillRect(OFFSET_X + headY * SIZE_CASE, OFFSET_Y + (headX + i) * SIZE_CASE, SIZE_CASE, SIZE_CASE)
+        ctx.fillRect(OFFSET_X + (headY + i) * SIZE_CASE, OFFSET_Y + headX * SIZE_CASE, SIZE_CASE, SIZE_CASE)
+        ctx.fillRect(OFFSET_X + (headY - i)* SIZE_CASE, OFFSET_Y + headX * SIZE_CASE, SIZE_CASE, SIZE_CASE)
+        ctx.fillText(actions[0].toFixed(2), 5 + OFFSET_X + headY * SIZE_CASE, 25 + OFFSET_Y + (headX + 1) * SIZE_CASE) // front
+        ctx.fillText(actions[1].toFixed(2), 5 + OFFSET_X + (headY + 1) * SIZE_CASE, 25 + OFFSET_Y + headX * SIZE_CASE) // left
+        ctx.fillText(actions[2].toFixed(2), 5 + OFFSET_X + (headY - 1) * SIZE_CASE, 25 + OFFSET_Y + headX * SIZE_CASE) // right
       }
     }
   }

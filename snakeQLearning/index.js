@@ -7,6 +7,7 @@ let width = window.innerWidth
 let height = window.innerHeight
 ctx.canvas.width = width
 ctx.canvas.height = height
+ctx.font = '15px serif'
 
 const environnement = new Snake()
 const agentSnake = new Agent(environnement)
@@ -17,17 +18,22 @@ console.log(agentSnake)
 document.onkeydown = key => {
   environnement.updateDirectionKeyboard(key.keyCode)
   agentSnake.environnement.step(0)
+  agentSnake.drawQTable(ctx, canvas)
 }
 
 const loop = () => {
   agentSnake.environnement.tick++
   agentSnake.environnement.drawEnvironnement(ctx, canvas) // Draw the game
-  if (agentSnake.environnement.tick % 2 === 0) { // TODO: game loop in class
+  agentSnake.drawQTable(ctx, canvas)
+
+  if (agentSnake.environnement.tick % 20 === 0) { // TODO: game loop in class
     agentSnake.playGreedy()
+    agentSnake.drawQTable(ctx, canvas)
   }
 
   requestAnimationFrame(loop) // Repeat..
 }
+
 agentSnake.train()
 agentSnake.environnement.reset()
 loop()

@@ -1,8 +1,8 @@
 const SIZE = 12 // the size of the grid will be SIZE*SIZE
 
-const SIZE_CASE = 40 // number of pixels per case (1 case => 40x40 pixels)
-const OFFSET_X = 500 // pixels offset for drawing the whole scene in the middle of the page
-const OFFSET_Y = 50
+export const SIZE_CASE = 40 // number of pixels per case (1 case => 40x40 pixels)
+export const OFFSET_X = 500 // pixels offset for drawing the whole scene in the middle of the page
+export const OFFSET_Y = 50
 
 const REWARD_FOOD = 10 // eating something
 const REWARD_LOST = - 10 // losing the game
@@ -13,6 +13,12 @@ export const TURN_LEFT = 1
 export const TURN_RIGHT = 2
 export const ALL_ACTIONS = [FORWARD, TURN_LEFT, TURN_RIGHT]
 export const NB_ACTION = ALL_ACTIONS.length
+
+export const RIGHT = 0
+export const TOP = 1
+export const LEFT = 2
+export const BOTTOM = 3
+export const SIGHT = 5
 
 export class Snake {
   constructor() {
@@ -66,32 +72,32 @@ export class Snake {
     if (keyCode === 38) return // 38 <=> keep going straight
     if (keyCode === 37) { // turning left from current direction
       switch (this.direction) {
-        case 0:
-          this.direction = 1
+        case RIGHT:
+          this.direction = TOP
           break
-        case 1:
-          this.direction = 2
+        case TOP:
+          this.direction = LEFT
           break
-        case 2:
-          this.direction = 3
+        case LEFT:
+          this.direction = BOTTOM
           break
-        case 3:
-          this.direction = 0
+        case BOTTOM:
+          this.direction = RIGHT
           break
       }
     } else if (keyCode === 39) { // turning right from current direction
       switch (this.direction) {
-        case 0:
-          this.direction = 3
+        case RIGHT:
+          this.direction = BOTTOM
           break
-        case 1:
-          this.direction = 0
+        case TOP:
+          this.direction = RIGHT
           break
-        case 2:
-          this.direction = 1
+        case LEFT:
+          this.direction = TOP
           break
-        case 3:
-          this.direction = 2
+        case BOTTOM:
+          this.direction = LEFT
           break
       }
     }
@@ -101,32 +107,32 @@ export class Snake {
     if (action === FORWARD) return // keep going straight
     if (action === TURN_LEFT) {
       switch (this.direction) { // turning left from current direction
-        case 0:
-          this.direction = 1
+        case RIGHT:
+          this.direction = TOP
           break
-        case 1:
-          this.direction = 2
+        case TOP:
+          this.direction = LEFT
           break
-        case 2:
-          this.direction = 3
+        case LEFT:
+          this.direction = BOTTOM
           break
-        case 3:
-          this.direction = 0
+        case BOTTOM:
+          this.direction = RIGHT
           break
       }
     } else if (action === TURN_RIGHT) { // turning right from current direction
       switch (this.direction) {
-        case 0:
-          this.direction = 3
+        case RIGHT:
+          this.direction = BOTTOM
           break
-        case 1:
-          this.direction = 0
+        case TOP:
+          this.direction = RIGHT
           break
-        case 2:
-          this.direction = 1
+        case LEFT:
+          this.direction = TOP
           break
-        case 3:
-          this.direction = 2
+        case BOTTOM:
+          this.direction = LEFT
           break
       }
     }
@@ -149,15 +155,15 @@ export class Snake {
     this.updateDirection(action)
     let lengthSnake = this.snake.length
     // Moving the head
-    if (this.direction === 0) { // going right
+    if (this.direction === RIGHT) { // going right
       this.snake.push([this.snake[lengthSnake-1][0], this.snake[lengthSnake-1][1] + 1])
       this.grid[this.snake[lengthSnake-1][0]][this.snake[lengthSnake-1][1] + 1] = 1
-    } else if (this.direction === 1) { // going top
+    } else if (this.direction === TOP) { // going top
       this.snake.push([this.snake[lengthSnake-1][0] - 1, this.snake[lengthSnake-1][1]])
       if (this.snake[lengthSnake-1][0] - 1 >= 0) {
         this.grid[this.snake[lengthSnake-1][0] - 1][this.snake[lengthSnake-1][1]] = 1
       }
-    } else if (this.direction === 2) { // going left
+    } else if (this.direction === LEFT) { // going left
       this.snake.push([this.snake[lengthSnake-1][0], this.snake[lengthSnake-1][1] - 1])
       this.grid[this.snake[lengthSnake-1][0]][this.snake[lengthSnake-1][1] - 1] = 1
     } else { // going down
@@ -195,76 +201,39 @@ export class Snake {
   getState = () => {
     let headX = this.snake[this.snake.length - 1][0]
     let headY = this.snake[this.snake.length - 1][1]
-    let front1, front2, front3, front4, front5
-    let left1, left2, left3, left4, left5
-    let right1, right2, right3, right4, right5
-    if (this.direction === 0) { // right
-      front1 = headY + 1 >= SIZE ? 1 : this.grid[headX][headY + 1]
-      front2 = headY + 2 >= SIZE ? 1 : this.grid[headX][headY + 2]
-      front3 = headY + 3 >= SIZE ? 1 : this.grid[headX][headY + 3]
-      front4 = headY + 4 >= SIZE ? 1 : this.grid[headX][headY + 4]
-      front5 = headY + 5 >= SIZE ? 1 : this.grid[headX][headY + 5]
-      left1 = headX - 1 < 0 ? 1 : this.grid[headX - 1][headY]
-      left2 = headX - 2 < 0 ? 1 : this.grid[headX - 2][headY]
-      left3 = headX - 3 < 0 ? 1 : this.grid[headX - 3][headY]
-      left4 = headX - 4 < 0 ? 1 : this.grid[headX - 4][headY]
-      left5 = headX - 5 < 0 ? 1 : this.grid[headX - 5][headY]
-      right1 = headX + 1 >= SIZE ? 1 : this.grid[headX + 1][headY]
-      right2 = headX + 2 >= SIZE ? 1 : this.grid[headX + 2][headY]
-      right3 = headX + 3 >= SIZE ? 1 : this.grid[headX + 3][headY]
-      right4 = headX + 4 >= SIZE ? 1 : this.grid[headX + 4][headY]
-      right5 = headX + 5 >= SIZE ? 1 : this.grid[headX + 5][headY]
-    } else if (this.direction === 1) { // top
-      front1 = headX - 1 < 0 ? 1 : this.grid[headX - 1][headY]
-      front2 = headX - 2 < 0 ? 1 : this.grid[headX - 2][headY]
-      front3 = headX - 3 < 0 ? 1 : this.grid[headX - 3][headY]
-      front4 = headX - 4 < 0 ? 1 : this.grid[headX - 4][headY]
-      front5 = headX - 5 < 0 ? 1 : this.grid[headX - 5][headY]
-      left1 = headY - 1 < 0 ? 1 : this.grid[headX][headY - 1]
-      left2 = headY - 2 < 0 ? 1 : this.grid[headX][headY - 2]
-      left3 = headY - 3 < 0 ? 1 : this.grid[headX][headY - 3]
-      left4 = headY - 4 < 0 ? 1 : this.grid[headX][headY - 4]
-      left5 = headY - 5 < 0 ? 1 : this.grid[headX][headY - 5]
-      right1 = headY + 1 >= SIZE ? 1 : this.grid[headX][headY + 1]
-      right2 = headY + 2 >= SIZE ? 1 : this.grid[headX][headY + 2]
-      right3 = headY + 3 >= SIZE ? 1 : this.grid[headX][headY + 3]
-      right4 = headY + 4 >= SIZE ? 1 : this.grid[headX][headY + 4]
-      right5 = headY + 5 >= SIZE ? 1 : this.grid[headX][headY + 5]
-    } else if (this.direction === 2) { // left
-      front1 = headY - 1 < 0 ? 1 : this.grid[headX][headY - 1]
-      front2 = headY - 2 < 0 ? 1 : this.grid[headX][headY - 2]
-      front3 = headY - 3 < 0 ? 1 : this.grid[headX][headY - 3]
-      front4 = headY - 4 < 0 ? 1 : this.grid[headX][headY - 4]
-      front5 = headY - 5 < 0 ? 1 : this.grid[headX][headY - 5]
-      left1 = headX + 1 >= SIZE ? 1 : this.grid[headX + 1][headY]
-      left2 = headX + 2 >= SIZE ? 1 : this.grid[headX + 2][headY]
-      left3 = headX + 3 >= SIZE ? 1 : this.grid[headX + 3][headY]
-      left4 = headX + 4 >= SIZE ? 1 : this.grid[headX + 4][headY]
-      left5 = headX + 5 >= SIZE ? 1 : this.grid[headX + 5][headY]
-      right1 = headX - 1 < 0 ? 1 : this.grid[headX - 1][headY]
-      right2 = headX - 2 < 0 ? 1 : this.grid[headX - 2][headY]
-      right3 = headX - 3 < 0 ? 1 : this.grid[headX - 3][headY]
-      right4 = headX - 4 < 0 ? 1 : this.grid[headX - 4][headY]
-      right5 = headX - 5 < 0 ? 1 : this.grid[headX - 5][headY]
+    let front = []
+    let left = []
+    let right = []
+    if (this.direction === RIGHT) {
+      for (let i = 1; i < SIGHT + 1; i++) {
+        front[i - 1] = headY + i >= SIZE ? 1 : this.grid[headX][headY + i]
+        left[i - 1] = headX - i < 0 ? 1 : this.grid[headX - i][headY]
+        right[i - 1] = headX + i >= SIZE ? 1 : this.grid[headX + i][headY]
+      }
+    } else if (this.direction === TOP) {
+      for (let i = 1; i < SIGHT + 1; i++) {
+        front[i - 1] = headX - i < 0 ? 1 : this.grid[headX - i][headY]
+        left[i - 1] = headY - i < 0 ? 1 : this.grid[headX][headY - i]
+        right[i - 1] = headY + i >= SIZE ? 1 : this.grid[headX][headY + i]
+      }
+    } else if (this.direction === LEFT) {
+      for (let i = 1; i < SIGHT + 1; i++) {
+        front[i - 1] = headY - i < 0 ? 1 : this.grid[headX][headY - i]
+        left[i - 1] = headX + i >= SIZE ? 1 : this.grid[headX + i][headY]
+        right[i - 1] = headX - i < 0 ? 1 : this.grid[headX - i][headY]
+      }
     } else {  // bottom
-      front1 = headX + 1 >= SIZE ? 1 : this.grid[headX + 1][headY]
-      front2 = headX + 2 >= SIZE ? 1 : this.grid[headX + 2][headY]
-      front3 = headX + 3 >= SIZE ? 1 : this.grid[headX + 3][headY]
-      front4 = headX + 4 >= SIZE ? 1 : this.grid[headX + 4][headY]
-      front5 = headX + 5 >= SIZE ? 1 : this.grid[headX + 5][headY]
-      left1 = headY + 1 >= SIZE ? 1 : this.grid[headX][headY + 1]
-      left2 = headY + 2 >= SIZE ? 1 : this.grid[headX][headY + 2]
-      left3 = headY + 3 >= SIZE ? 1 : this.grid[headX][headY + 3]
-      left4 = headY + 4 >= SIZE ? 1 : this.grid[headX][headY + 4]
-      left5 = headY + 5 >= SIZE ? 1 : this.grid[headX][headY + 5]
-      right1 = headY - 1 < 0 ? 1 : this.grid[headX][headY - 1]
-      right2 = headY - 2 < 0 ? 1 : this.grid[headX][headY - 2]
-      right3 = headY - 3 < 0 ? 1 : this.grid[headX][headY - 3]
-      right4 = headY - 4 < 0 ? 1 : this.grid[headX][headY - 4]
-      right5 = headY - 5 < 0 ? 1 : this.grid[headX][headY - 5]
+      for (let i = 1; i < SIGHT + 1; i++) {
+        front[i - 1] = headX + i >= SIZE ? 1 : this.grid[headX + i][headY]
+        left[i - 1] = headY + i >= SIZE ? 1 : this.grid[headX][headY + i]
+        right[i - 1] = headY - i < 0 ? 1 : this.grid[headX][headY - i]
+      }
     }
-
-    let state = "" + front1 + front2 + front3 + front4 + front5 + left1 + left2 + left3 + left4 + left5 + right1 + right2 + right3 + right4 + right5
+    let state = ""
+    for (let i = 0; i < SIGHT; i++) {
+      state += "" + front[i] + left[i] + right[i]
+    }
+    // let state = "" + front1 + front2 + front3 + front4 + front5 + left1 + left2 + left3 + left4 + left5 + right1 + right2 + right3 + right4 + right5
     return parseInt(state, 3)
   }
 
