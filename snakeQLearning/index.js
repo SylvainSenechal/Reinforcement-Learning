@@ -26,7 +26,7 @@ const loop = () => {
   agentSnake.environnement.drawEnvironnement(ctx, canvas) // Draw the game
   agentSnake.drawQTable(ctx, canvas)
 
-  if (agentSnake.environnement.tick % 20 === 0) { // TODO: game loop in class
+  if (agentSnake.environnement.tick % 15 === 0) { // TODO: game loop in class
     agentSnake.playGreedy()
     agentSnake.drawQTable(ctx, canvas)
   }
