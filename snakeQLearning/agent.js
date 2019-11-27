@@ -4,11 +4,11 @@ import {OFFSET_X, OFFSET_Y, SIZE_CASE} from './snakeGame.js'
 
 const LEARNING_RATE = 0.01
 const GAMMA = 0.8
-const EPOCH = 50000
+export const EPOCH = 20000
 const EPSILON_PICK_ACTION_FULL_GREEDY = 0
 const NB_GAME_BENCHMARK = 200
 
-export default class Agent {
+export class Agent {
   constructor(environnement) {
     this.environnement = environnement
     // Size + 1 : Last state is the lost state
@@ -58,8 +58,9 @@ export default class Agent {
     this.totalRewardBenchmark = this.totalRewardBenchmark / NB_GAME_BENCHMARK // computing average snake length
   }
 
-  train = () => {
+  train = async () => {
     for (let i = 0; i < EPOCH; i++) {
+
       this.nbEpoch++
       if (this.nbEpoch % 1000 === 0) {
         // console.log('Epoch : ', this.nbEpoch)
@@ -67,9 +68,9 @@ export default class Agent {
         this.benchmarkAgent()
         console.log('Value benchmark : ', this.totalRewardBenchmark)
       }
+
       this.environnement.reset()
       let currentState = this.environnement.getState()
-
       while (!this.environnement.checkGameOver()) {
         this.nbUpdatesQTable++
         let epsilon = 0.01

@@ -1,6 +1,8 @@
 import {Snake} from './snakeGame.js'
-import Agent from './agent.js'
+import {Agent, EPOCH} from './agent.js'
 
+
+console.log(EPOCH)
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
 let width = window.innerWidth
@@ -26,7 +28,7 @@ const loop = () => {
   agentSnake.environnement.drawEnvironnement(ctx, canvas) // Draw the game
   agentSnake.drawQTable(ctx, canvas)
 
-  if (agentSnake.environnement.tick % 15 === 0) { // TODO: game loop in class
+  if (agentSnake.environnement.tick % 10 === 0) {
     agentSnake.playGreedy()
     agentSnake.drawQTable(ctx, canvas)
   }
